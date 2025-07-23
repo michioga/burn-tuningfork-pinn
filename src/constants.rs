@@ -4,15 +4,15 @@
 
 /// 物理計算に関する定数
 pub mod physics {
-    // 材質: ステンレス鋼 (SUS304) を想定
+    // 材質: 一般構造用圧延鋼材(SS400) を想定
     /// ヤング率 (Pa)。材料の硬さを示す指標。
-    pub const YOUNGS_MODULUS: f32 = 193.0e9;
+    pub const YOUNGS_MODULUS: f32 = 206.0e9;
     /// 密度 (kg/m^3)。
-    pub const DENSITY: f32 = 8000.0;
+    pub const DENSITY: f32 = 7850.0;
     /// ポアソン比。材料が引張られた際の横方向の縮みを示す。今回は未使用。
-    pub const POISSON_RATIO: f32 = 0.29;
+    pub const POISSON_RATIO: f32 = 0.3;
 
-    /// 振動モードの係数
+    /// 片持ち梁の1次曲げ振動モードを計算するための無次元化定数(λ^2)
     pub const K_FACTOR: f32 = 3.5160;
 
     // 正規化後の損失に対する重み基準。
@@ -20,7 +20,7 @@ pub mod physics {
     // 学習の様子を見ながら、ここから微調整を行う。
 
     /// `ratio_penalty`（プロング長 > 柄長）に対する重み。
-    pub const PENALTY_WEIGHT_RATIO: f32 = 1.0;
+    pub const PENALTY_WEIGHT_RATIO: f32 = 0.5;
     /// `range_penalty`（プロング関連の寸法範囲）に対する重み。
     pub const PENALTY_WEIGHT_RANGE: f32 = 1.0;
     /// `range_penalty`（その他の寸法範囲）に対する重み。

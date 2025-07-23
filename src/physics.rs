@@ -1,4 +1,10 @@
 //! src/physics.rs
+//! # 物理法則に基づく損失関数 (理論モデル)
+//!
+//! このモジュールはPINNの「物理法則情報付き」の部分、すなわち「理論モデル」です。
+//! `model.rs`で定義された「学習モデル」が最小化すべき目的関数（損失関数）を提供します。
+//!
+//! 損失は、モデルの予測が物理的にどれだけ妥当かを評価する複数の要素から構成されます。
 
 use crate::constants::{model_dims, physics::*};
 use burn::prelude::*;
@@ -45,8 +51,6 @@ pub fn tuning_fork_loss<B: Backend>(
     .powf_scalar(2.0);
 
     // --- 2. 物理的制約に対する正規化ペナルティの計算 ---
-
-    // ⭐️⭐️⭐️ 修正点: .clone() を追加して所有権の問題を解決 ⭐️⭐️⭐️
     let ratio_penalty = (relu(handle_length.clone() - prong_length.clone())
         / handle_length.clone().add_scalar(epsilon))
     .powf_scalar(2.0);

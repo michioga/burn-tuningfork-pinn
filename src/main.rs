@@ -1,11 +1,18 @@
 //! src/main.rs
 #![recursion_limit = "256"]
 #![allow(clippy::single_component_path_imports)]
-// CudaとNdArrayは使っていないので削除
-use burn::backend::{wgpu::Wgpu, Autodiff};
-use clap::{Parser, Subcommand};
 
-// 各モジュールをインポート
+use burn::backend::{
+    wgpu::{Wgpu, WgpuDevice},
+    cuda::{Cuda, CudaDevice},
+    ndarray::{NdArray, NdArrayDevice},
+    Autodiff,
+};
+use burn::tensor::backend::AutodiffBackend;
+
+use clap::{Parser, Subcommand, ValueEnum};
+
+// Project modules remain the same
 mod constants;
 mod dataset;
 mod infer;
@@ -14,37 +21,63 @@ mod physics;
 mod train;
 
 #[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    #[arg(long, value_enum, default_value_t = BackendChoice::Wgpu)]
+    backend: BackendChoice,
 }
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// モデルを学習させる
     Train,
-    /// 学習済みモデルで推論する
     Infer {
-        /// 推奨を得たい周波数 (Hz)
         #[arg(short, long)]
         freq: f32,
     },
 }
 
-fn main() {
-    let cli = Cli::parse();
-    // デフォルトのバックエンドとしてWGPUを使用
-    type MyBackend = Wgpu;
-    type MyAutodiffBackend = Autodiff<MyBackend>;
+#[derive(ValueEnum, Clone, Debug)]
+enum BackendChoice {
+    Wgpu,
+    Cuda,
+    NdArray,
+}
 
-    let device = burn::backend::wgpu::WgpuDevice::default();
-
+fn run_app<B: AutodiffBackend>(cli: Cli, device: B::Device) {
     match cli.command {
         Commands::Train => {
-            train::run::<MyAutodiffBackend>(device);
+            train::run::<B>(device);
         }
         Commands::Infer { freq } => {
-            infer::run::<MyBackend>(freq, device);
+            infer::run::<B::InnerBackend>(freq, device);
+        }
+    }
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    match cli.backend {
+        BackendChoice::Wgpu => {
+            println!("🚀 Using WGPU backend...");
+            type Backend = Autodiff<Wgpu>;
+            let device = WgpuDevice::default();
+            run_app::<Backend>(cli, device);
+        }
+        BackendChoice::Cuda => {
+            println!("🚀 Using CUDA backend...");
+            type Backend = Autodiff<Cuda>;
+            let device = CudaDevice::default();
+            run_app::<Backend>(cli, device);
+        }
+        BackendChoice::NdArray => {
+            println!("🚀 Using NdArray (CPU) backend...");
+            type Backend = Autodiff<NdArray<f32>>;
+            let device = NdArrayDevice::default();
+            run_app::<Backend>(cli, device);
         }
     }
 }
