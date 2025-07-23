@@ -95,22 +95,22 @@ cargo run --release -- --backend cuda infer --freq 440.0
 理論モデル（`src/physics.rs`）は、以下の片持ち梁の振動に関する方程式を用いて、ニューラルネットワークが予測した寸法（プロングの長さ `L` と直径 `d`）から周波数 `f` を算出します。
 
 1.  **断面積 (Area)**:
-    $
+    $`
     A = \frac{\pi d^2}{4}
-    $
+    `$
 
 2.  **断面二次モーメント (Moment of Inertia)**:
-    $
+    $`
     I = \frac{\pi d^4}{64}
-    $
+    `$
 
 3.  **周波数 (Frequency)**:
-    $
+    $`
     f = \frac{k}{2\pi L^2} \sqrt{\frac{E \cdot I}{\rho \cdot A}}
-    $
+    `$
 
 ここで、
--   `E`: ヤング率 (`YOUNGS_MODULUS`)
+-   E: ヤング率 (`YOUNGS_MODULUS`)
 -   `ρ`: 材料の密度 (`DENSITY`)
 -   `k`: 振動モードの定数 (`K_FACTOR`)
 
