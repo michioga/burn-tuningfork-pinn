@@ -118,27 +118,27 @@ $`
 せん断変形と回転慣性を無視した、最も基本的な梁理論です。細くて長い梁に適用されます。
 
 1.  **断面積 (Area)**:
-    $`
-A = \frac{\pi d^2}{4}
-`$
+  $`
+  A = \frac{\pi d^2}{4}
+  `$
 
 2.  **断面二次モーメント (Moment of Inertia)**:
-    $`
-I = \frac{\pi d^4}{64}
-`$
+  $`
+  I = \frac{\pi d^4}{64}
+  `$
 
 3.  **周波数 (Frequency)**:
-    $`
-f = \frac{k}{2\pi L^2} \sqrt{\frac{E \cdot I}{\rho \cdot A}}
-`$
+  $`
+  f = \frac{k}{2\pi L^2} \sqrt{\frac{E \cdot I}{\rho \cdot A}}
+  `$
 
 #### 2. ティモシェンコ梁理論 (Timoshenko Beam Theory)
 
 せん断変形と回転慣性を考慮した、より高精度な梁理論です。太くて短い梁や高周波振動に適用されます。オイラー・ベルヌーイ理論の周波数 `f_e` を用いて、以下のように近似されます。
 
-$`
-f_t = \frac{f_e}{\sqrt{1 + \frac{3 E I}{k' G A L^2}}}
-`$
+  $`
+  f_t = \frac{f_e}{\sqrt{1 + \frac{3 E I}{k' G A L^2}}}
+  `$
 
 ここで、
 -   `f_e`: オイラー・ベルヌーイ梁理論による周波数
@@ -150,5 +150,3 @@ f_t = \frac{f_e}{\sqrt{1 + \frac{3 E I}{k' G A L^2}}}
 -   `E`: ヤング率 (`YOUNGS_MODULUS`)
 -   `ρ`: 材料の密度 (`DENSITY`)
 -   `k`: 振動モードの定数 (`K_FACTOR`)
-
-```
