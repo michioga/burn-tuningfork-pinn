@@ -50,7 +50,7 @@ pub fn tuning_fork_loss<B: Backend>(
     let epsilon = 1e-8;
 
     // --- 各次元のテンソルへの参照を取得 ---
-    let dim_tensors = predicted_dims.split(1, 1);
+    let dim_tensors = predicted_dims.clone().split(1, 1);
     let handle_length = &dim_tensors[model_dims::HANDLE_LENGTH_IDX];
     let handle_diameter = &dim_tensors[model_dims::HANDLE_DIAMETER_IDX];
     let prong_length = &dim_tensors[model_dims::PRONG_LENGTH_IDX];
