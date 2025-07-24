@@ -9,22 +9,32 @@ pub mod physics {
     pub const YOUNGS_MODULUS: f32 = 206.0e9;
     /// 密度 (kg/m^3)。
     pub const DENSITY: f32 = 7850.0;
-    /// ポアソン比。材料が引張られた際の横方向の縮みを示す。今回は未使用。
+    /// ポアソン比。材料が引張られた際の横方向の縮みを示す。
     pub const POISSON_RATIO: f32 = 0.3;
 
     /// 片持ち梁の1次曲げ振動モードを計算するための無次元化定数(λ^2)
     pub const K_FACTOR: f32 = 3.5160;
 
-    // 正規化後の損失に対する重み基準。
-    // 各損失項のスケールが近くなったため、まずは全て1.0から始める。
-    // 学習の様子を見ながら、ここから微調整を行う。
-
+    // --- 損失関数の重み設定 ---
     /// `ratio_penalty`（プロング長 > 柄長）に対する重み。
     pub const PENALTY_WEIGHT_RATIO: f32 = 0.5;
     /// `range_penalty`（プロング関連の寸法範囲）に対する重み。
     pub const PENALTY_WEIGHT_RANGE: f32 = 1.0;
     /// `range_penalty`（その他の寸法範囲）に対する重み。
     pub const PENALTY_WEIGHT_OTHER: f32 = 1.0;
+
+    // --- 物理モデルの選択 ---
+    /// 使用する梁の理論モデルを定義します。
+    #[derive(Clone, Copy, Debug)]
+    pub enum BeamTheory {
+        /// オイラー・ベルヌーイの梁理論（せん断変形を無視する単純なモデル）
+        Euler,
+        /// ティモシェンコの梁理論（せん断変形を考慮する高精度なモデル）
+        Timoshenko,
+    }
+
+    /// プロジェクト全体で使用する梁理論を選択します。
+    pub const BEAM_THEORY_CHOICE: BeamTheory = BeamTheory::Timoshenko;
 }
 
 /// モデルの寸法に関する定数
