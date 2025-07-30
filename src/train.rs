@@ -5,9 +5,10 @@
 
 // ⭐️ 1. physicsモジュールをインポート
 use crate::{
+    constants::physics::BEAM_THEORY_CHOICE,
     dataset::{FemDataset, PinnBatcher},
     model::TuningForkPINN,
-    physics, // <--- ADD THIS
+    physics,
 };
 use burn::{
     config::Config,
@@ -24,22 +25,30 @@ use burn::{
     },
 };
 
-/// モデルの学習ステップの実装
+/// モデルの学習ステップを定義します。
 ///
-/// ここがPINN（物理法則情報付きニューラルネットワーク）アプローチの心臓部です。
-/// 通常の教師あり学習のように、モデルの出力をデータセットの「正解」と比較する代わりに、
-/// `physics::tuning_fork_loss` を使って、予測が物理法則にどれだけ従っているかを評価します。
-/// この「物理損失」を最小化することで、モデルは物理法則そのものを学習します。
+/// この実装はPINNアプローチの心臓部です。
+/// `physics::tuning_fork_loss` を呼び出し、データ損失（FEMデータとの誤差）と
+/// 物理損失（物理法則との誤差）を組み合わせたハイブリッド損失を計算します。
+/// この損失を最小化することで、モデルはデータへの忠実度と物理法則への準拠を両立するように学習します。
 impl<B: AutodiffBackend> TrainStep<(Tensor<B, 2>, Tensor<B, 2>), RegressionOutput<B>>
     for TuningForkPINN<B>
 {
     /// モデルの検証ステップの実装
     fn step(&self, item: (Tensor<B, 2>, Tensor<B, 2>)) -> TrainOutput<RegressionOutput<B>> {
-        let (freqs, targets) = item; // `targets` はログ出力用に残すが、損失計算には使わない
+        let (freqs, targets) = item; // `targets` がFEMの正解寸法
         let predicted_dims = self.forward(freqs.clone());
 
-        // MseLossの代わりに、物理損失関数を呼び出す
-        let loss = physics::tuning_fork_loss(predicted_dims.clone(), freqs);
+        // FEMデータをより重視したい場合、alphaを0.5などに設定
+        const ALPHA: f32 = 0.5;
+
+        let loss = physics::tuning_fork_loss(
+            predicted_dims.clone(),
+            freqs,
+            targets.clone(), // 正解寸法を渡す
+            ALPHA,           // alphaを渡す
+            BEAM_THEORY_CHOICE, // 梁理論の選択を渡す
+        );
 
         let output = RegressionOutput {
             loss: loss.clone(),
@@ -50,7 +59,10 @@ impl<B: AutodiffBackend> TrainStep<(Tensor<B, 2>, Tensor<B, 2>), RegressionOutpu
     }
 }
 
-/// モデルの検証ステップの実装
+/// モデルの検証ステップを定義します。
+///
+/// 学習ステップと同様に、ハイブリッド損失（データ損失 + 物理損失）を計算して、
+/// 検証データに対するモデルの性能を評価します。
 impl<B: Backend> ValidStep<(Tensor<B, 2>, Tensor<B, 2>), RegressionOutput<B>>
     for TuningForkPINN<B>
 {
@@ -59,8 +71,16 @@ impl<B: Backend> ValidStep<(Tensor<B, 2>, Tensor<B, 2>), RegressionOutput<B>>
         let (freqs, targets) = item;
         let predicted_dims = self.forward(freqs.clone());
 
+        const ALPHA: f32 = 0.5;
+
         // こちらも物理損失関数で評価する
-        let loss = physics::tuning_fork_loss(predicted_dims.clone(), freqs);
+        let loss = physics::tuning_fork_loss(
+            predicted_dims.clone(),
+            freqs,
+            targets.clone(),
+            ALPHA,
+            BEAM_THEORY_CHOICE,
+        );
 
         RegressionOutput {
             loss,
