@@ -112,7 +112,7 @@ pub fn run<B: AutodiffBackend>(device: B::Device) {
     let artifact_dir = "./artifacts";
     std::fs::create_dir_all(artifact_dir).ok();
 
-    let dataset_all = FemDataset::new("data/fem_data_augmented.csv");
+    let dataset_all = FemDataset::new("data/summary_parameters.csv");
     let dataset_train = dataset_all.clone();
     let dataset_valid = dataset_all;
 
