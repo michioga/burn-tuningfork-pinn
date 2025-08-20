@@ -44,11 +44,11 @@ pub struct TuningForkPINN<B: Backend> {
 
 impl<B: Backend> TuningForkPINN<B> {
     pub fn new(device: &B::Device) -> Self {
-        let hidden_size = 256;
+        let hidden_size = 512;
         let dropout_prob = 0.2; // 20%のニューロンを無効化
 
         Self {
-            layer_1: LinearConfig::new(1, hidden_size).init(device),
+            layer_1: LinearConfig::new(4, hidden_size).init(device),
             norm_1: LayerNormConfig::new(hidden_size).init(device),
             activation_1: Relu::new(),
             dropout_1: DropoutConfig::new(dropout_prob).init(),

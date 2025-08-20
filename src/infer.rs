@@ -18,7 +18,14 @@ pub fn run<B: Backend>(freq: f32, device: B::Device) {
 
     let model: TuningForkPINN<B> = TuningForkPINN::new(&device).load_record(record);
 
-    let input = Tensor::<B, 2>::from_floats([[freq]], &device);
+    let freq_norm = freq / 1000.0;
+    let input_features = [
+        freq_norm.sin(),
+        freq_norm.cos(),
+        freq_norm,
+        freq_norm.powi(2),
+    ];
+    let input = Tensor::<B, 2>::from_floats([input_features], &device);
 
     let dims = model.forward(input);
     let dims_values: Vec<f32> = dims.into_data().convert::<f32>().into_vec().unwrap();

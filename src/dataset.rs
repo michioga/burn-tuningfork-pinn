@@ -62,11 +62,17 @@ impl<B: Backend> Batcher<B, FemDataItem, (Tensor<B, 2>, Tensor<B, 2>)> for PinnB
     fn batch(&self, items: Vec<FemDataItem>, device: &B::Device) -> (Tensor<B, 2>, Tensor<B, 2>) {
         let batch_size = items.len();
 
-        let mut freqs_flat = Vec::with_capacity(batch_size);
+        let mut freqs_flat = Vec::with_capacity(batch_size * 4);
         let mut dims_flat = Vec::with_capacity(batch_size * model_dims::NUM_DIMS);
 
         for item in items {
-            freqs_flat.push(item.frequency);
+            let freq_norm = item.frequency / 1000.0; // Normalize frequency
+            freqs_flat.extend([
+                freq_norm.sin(),
+                freq_norm.cos(),
+                freq_norm,
+                freq_norm.powi(2),
+            ]);
             
             // constants.rsで定義されたインデックスの順序に合わせてデータを格納
             dims_flat.extend([
@@ -78,7 +84,7 @@ impl<B: Backend> Batcher<B, FemDataItem, (Tensor<B, 2>, Tensor<B, 2>)> for PinnB
             ]);
         }
 
-        let freqs_tensor = Tensor::<B, 1>::from_floats(freqs_flat.as_slice(), device).reshape([-1, 1]);
+        let freqs_tensor = Tensor::<B, 1>::from_floats(freqs_flat.as_slice(), device).reshape([-1, 4]);
         let dims_tensor = Tensor::<B, 1>::from_floats(dims_flat.as_slice(), device).reshape([-1, model_dims::NUM_DIMS as i32]);
 
         (freqs_tensor, dims_tensor)
