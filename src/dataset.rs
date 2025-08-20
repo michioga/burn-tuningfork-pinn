@@ -70,11 +70,11 @@ impl<B: Backend> Batcher<B, FemDataItem, (Tensor<B, 2>, Tensor<B, 2>)> for PinnB
             
             // constants.rsで定義されたインデックスの順序に合わせてデータを格納
             dims_flat.extend([
-                item.handle_length,
-                item.handle_diameter,
-                item.prong_length,
-                item.prong_diameter,
-                item.prong_gap,
+                item.handle_length / 1000.0,
+                item.handle_diameter / 1000.0,
+                item.prong_length / 1000.0,
+                item.prong_diameter / 1000.0,
+                item.prong_gap / 1000.0,
             ]);
         }
 

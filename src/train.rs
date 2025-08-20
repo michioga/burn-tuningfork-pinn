@@ -21,7 +21,7 @@ use burn::{
 
 const ARTIFACT_DIR: &str = "./artifacts";
 
-// ALPHAを0.5に設定
+// ALPHAを0.5に設定 (1.0に近いほどCSVのデータを優先する)
 const ALPHA: f32 = 0.5;
 
 impl<B: AutodiffBackend> TrainStep<(Tensor<B, 2>, Tensor<B, 2>), RegressionOutput<B>>
